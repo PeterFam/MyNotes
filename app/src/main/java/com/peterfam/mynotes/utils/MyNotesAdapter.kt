@@ -28,7 +28,7 @@ class MyNotesAdapter internal constructor(
     override fun onBindViewHolder(holder: MyNotesViewHolder, position: Int) {
         val note = notesList[position]
         holder.noteTitleTextView.text = note.noteTitle
-
+        holder.noteDescTextView.text = note.noteContent
         holder.itemView.setOnLongClickListener {
             noteAdapterListener.onDeleteNote(note.id)
             false
@@ -41,8 +41,8 @@ class MyNotesAdapter internal constructor(
     }
 
     inner class MyNotesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val noteTitleTextView: TextView = itemView.findViewById(R.id.textView)
-
+        val noteTitleTextView: TextView = itemView.findViewById(R.id.title_textView)
+        val noteDescTextView: TextView = itemView.findViewById(R.id.desc_textView)
     }
 
     interface NoteAdapterListener {
