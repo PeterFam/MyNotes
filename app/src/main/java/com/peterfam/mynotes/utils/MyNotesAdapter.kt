@@ -33,6 +33,9 @@ class MyNotesAdapter internal constructor(
             noteAdapterListener.onDeleteNote(note.id)
             false
         }
+        holder.itemView.setOnClickListener {
+            noteAdapterListener.onItemClicked(note)
+        }
     }
 
     internal fun setNotes(notesList: List<Note>) {
@@ -47,5 +50,8 @@ class MyNotesAdapter internal constructor(
 
     interface NoteAdapterListener {
         fun onDeleteNote(noteID: Int)
+        fun onItemClicked(note: Note)
     }
+
+
 }

@@ -19,10 +19,14 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.add_note.*
 import java.util.*
 
-class MainActivity : AppCompatActivity(), MyNotesAdapter.NoteAdapterListener, TextUndoRedo.TextChangeInfo {
+class MainActivity : AppCompatActivity(), MyNotesAdapter.NoteAdapterListener,
+    TextUndoRedo.TextChangeInfo {
     private lateinit var noteViewModel: NoteViewModel
     private var TUR: TextUndoRedo? = null
     private var adapter: MyNotesAdapter? = null
+    private lateinit var addNoteBottomBehavior: BottomSheetBehavior<ConstraintLayout>
+    private var isUpdate: Boolean = false
+    private var note: Note? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -39,15 +43,18 @@ class MainActivity : AppCompatActivity(), MyNotesAdapter.NoteAdapterListener, Te
         recyclerView.layoutManager = GridLayoutManager(this, 2)
 
 
-        var addNoteBottomBehavior = BottomSheetBehavior.from(bottom_sheet_layout)
+        addNoteBottomBehavior = BottomSheetBehavior.from(bottom_sheet_layout)
         addNoteBottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         fab.setOnClickListener {
-            addNoteBottomBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            addNoteBottomBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+            titleTextView.setText("")
+            contentTextView.setText("")
+            isUpdate = false
         }
-        addNewNote(addNoteBottomBehavior)
+        addNewNote()
         TUR = TextUndoRedo(titleTextView, this)
         textAction()
-        undoBtn.setOnClickListener{
+        undoBtn.setOnClickListener {
             TUR!!.exeUndo()
         }
     }
@@ -63,18 +70,29 @@ class MainActivity : AppCompatActivity(), MyNotesAdapter.NoteAdapterListener, Te
         )
     }
 
-    private fun addNewNote(noteSheetBehavior: BottomSheetBehavior<ConstraintLayout>) {
+    private fun addNewNote() {
         saveBtn.setOnClickListener {
             if (!(titleTextView.text.trim().isEmpty() && contentTextView.text.trim().isEmpty())) {
-                noteViewModel.addNote(
-                    Note(
-                        noteTitle = titleTextView.text.toString(),
-                        noteContent = contentTextView.text.toString(),
-                        noteDate = Date().time
+                if (isUpdate) {
+                    noteViewModel.updateNote(
+                        Note(
+                            noteTitle = titleTextView.text.toString(),
+                            noteContent = contentTextView.text.toString(),
+                            noteDate = Date().time,
+                            id = note!!.id
+                        )
                     )
-                )
+                } else{
+                    noteViewModel.addNote(
+                        Note(
+                            noteTitle = titleTextView.text.toString(),
+                            noteContent = contentTextView.text.toString(),
+                            noteDate = Date().time
+                        )
+                    )
+                }
                 Toast.makeText(this, "Note Saved!", Toast.LENGTH_LONG).show()
-                noteSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+                addNoteBottomBehavior.state = BottomSheetBehavior.STATE_HIDDEN
                 titleTextView.setText("")
                 contentTextView.setText("")
                 hideKeyboard(parentView)
@@ -87,6 +105,14 @@ class MainActivity : AppCompatActivity(), MyNotesAdapter.NoteAdapterListener, Te
     override fun onDeleteNote(noteID: Int) {
         noteViewModel.deleteNote(noteID)
         Toast.makeText(this, "Note Deleted!", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onItemClicked(note: Note) {
+        addNoteBottomBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        titleTextView.setText(note.noteTitle)
+        contentTextView.setText(note.noteContent)
+        isUpdate = true
+        this.note = note
     }
 
     override fun textAction() {

@@ -1,10 +1,7 @@
 package com.peterfam.mynotes.db
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.peterfam.mynotes.db.model.Note
 
 @Dao
@@ -18,4 +15,7 @@ interface NoteDao {
 
     @Query("DELETE FROM note WHERE id = :noteID")
     suspend fun deleteNote(noteID: Int)
+
+    @Update
+    suspend fun updateNote(note: Note)
 }

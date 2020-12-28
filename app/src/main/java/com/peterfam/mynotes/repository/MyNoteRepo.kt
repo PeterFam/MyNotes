@@ -12,4 +12,6 @@ class MyNoteRepo(private val noteDao: NoteDao) {
     suspend fun addNote(note: Note) = noteDao.addNote(note)
 
     suspend fun deleteNote(noteID: Int) = noteDao.deleteNote(noteID)
+
+    suspend fun updateNote(note: Note) = noteDao.updateNote(note)
 }
